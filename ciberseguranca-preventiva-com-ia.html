@@ -56,7 +56,7 @@
     .brand { color: var(--text); font-weight: 750; }
     .topbar .event { color: var(--cyan); }
     .progress { height: 2px; background: #142638; }
-    .progress span { display: block; height: 100%; width: 11.11%; background: var(--cyan); transition: width .25s ease; }
+    .progress span { display: block; height: 100%; width: 10%; background: var(--cyan); transition: width .25s ease; }
 
     main {
       width: min(100%, 1440px);
@@ -211,6 +211,16 @@
     .commitment q { color: #e8eff7; font-size: .95rem; line-height: 1.5; }
     .final-line { max-width: 900px; margin: 0; color: var(--text); font-size: clamp(1.55rem, 3vw, 2.65rem); font-weight: 720; letter-spacing: -.035em; line-height: 1.2; }
 
+    .questions-layout { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(250px, .85fr); gap: 1.2rem; margin-top: 1.4rem; }
+    .repo-panel, .contact-panel { padding: clamp(1rem, 2vw, 1.5rem); }
+    .repo-content { display: flex; align-items: center; gap: 1.2rem; }
+    .repo-qr { width: min(34vw, 210px); aspect-ratio: 1; flex: 0 0 auto; padding: .55rem; border-radius: 12px; background: white; }
+    .repo-details h3, .contact-panel h3 { color: var(--cyan); }
+    .repo-url { display: block; overflow-wrap: anywhere; font-size: .86rem; line-height: 1.5; }
+    .contact-item { padding: .75rem 0; border-top: 1px solid var(--line); }
+    .contact-label { display: block; margin-bottom: .3rem; color: var(--cyan); font-size: .72rem; font-weight: 750; letter-spacing: .12em; text-transform: uppercase; }
+    .contact-item p { margin: 0; color: #dce7f1; overflow-wrap: anywhere; }
+
     .sources { min-height: 1.4rem; padding: 0 clamp(1rem, 3vw, 3rem) .5rem; color: #8397aa; font-size: .68rem; }
     .sources a { color: #92b9d6; }
     .sources .lab-btn { display: inline-block; margin-left: .6rem; padding: .35rem .9rem; border-radius: 999px; background: #22d3ee; color: #04202a; font-weight: 800; font-size: .8rem; text-decoration: none; }
@@ -262,6 +272,9 @@
     }
     @media (max-width: 600px) {
       .compare, .close-grid { grid-template-columns: 1fr; }
+      .questions-layout { grid-template-columns: 1fr; }
+      .repo-content { align-items: flex-start; }
+      .repo-qr { width: min(34vw, 150px); }
       .pipeline { grid-template-columns: repeat(2, 1fr); }
       .stage:nth-child(3)::after { display: block; }
       .stage:nth-child(even)::after { display: none; }
@@ -673,7 +686,7 @@ button:hover,
   <div class="deck">
     <header class="topbar">
       <span class="brand">TECHDAY <span class="event">/ SEGURANÇA & IA</span></span>
-      <span>30 OUT 2026 · <span id="top-count">01 / 09</span></span>
+      <span>30 OUT 2026 · <span id="top-count">01 / 10</span></span>
     </header>
     <div class="progress" aria-hidden="true"><span id="progress"></span></div>
 
@@ -916,13 +929,47 @@ API_KEY = os.environ["API_KEY"]</code></pre>
           <p><strong>Fontes principais:</strong> IBM Cost of a Data Breach 2026, <a href="https://www.ibm.com/think/x-force/2026-cost-of-a-data-breach-ai-adversaries-enterprise-risk">análise IBM</a>; Hugging Face, <a href="https://huggingface.co/blog/security-incident-july-2026">comunicado de incidente de julho de 2026</a>; Microsoft, <a href="https://www.microsoft.com/en-us/security/blog/2025/11/03/sesameop-novel-backdoor-uses-openai-assistants-api-for-command-and-control/">análise SesameOp</a>; NIST, <a href="https://csrc.nist.gov/pubs/sp/800/218/final">SSDF 1.1</a>; CISA, <a href="https://www.cisa.gov/securebydesign">Secure by Design</a>. Data de referência do material: 25 out. 2026. Revise disponibilidade e atualizações das fontes antes da apresentação.</p>
         </aside>
       </section>
+
+      <section class="slide" aria-label="Slide 10: Dúvidas e contato">
+        <p class="kicker">09 · Perguntas e contato</p>
+        <h2>Dúvidas?<br><span class="accent">Vamos conversar.</span></h2>
+        <div class="questions-layout">
+          <article class="card repo-panel">
+            <div class="repo-content">
+              <img class="repo-qr" src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&amp;format=svg&amp;margin=8&amp;data=https%3A%2F%2Fgithub.com%2FGustavocirulo%2FTechDay_Security_with_AI" alt="QR Code para acessar o repositório TechDay Security with AI no GitHub">
+              <div class="repo-details">
+                <h3>Explore o repositório</h3>
+                <p class="small">Aponte a câmera do celular para acessar o projeto no GitHub.</p>
+                <a class="repo-url" href="https://github.com/Gustavocirulo/TechDay_Security_with_AI" target="_blank" rel="noreferrer">github.com/Gustavocirulo/TechDay_Security_with_AI</a>
+              </div>
+            </div>
+          </article>
+          <article class="card contact-panel">
+            <h3>Meus contatos</h3>
+            <div class="contact-item">
+              <span class="contact-label">E-mail</span>
+              <p>gustavo.cirulo@cadmustech.com.br</p>
+            </div>
+            <div class="contact-item">
+              <span class="contact-label">LinkedIn</span>
+              <p>linkedin.com/in/gustavo-h-cirulo/</p>
+            </div>
+            <p class="small">Substitua pelos seus dados antes de apresentar.</p>
+          </article>
+        </div>
+        <aside class="notes">
+          <h3>Objetivo · perguntas e encerramento</h3>
+          <p>Abra para perguntas, convide o público a explorar o repositório pelo QR Code e compartilhe seus contatos para continuar a conversa.</p>
+          <p>Antes de apresentar, substitua os exemplos de e-mail e LinkedIn pelos seus dados e confirme que o repositório permite acesso às pessoas da plateia.</p>
+        </aside>
+      </section>
     </main>
 
     <footer class="controls">
       <span class="hint">← → navegar · N notas · F tela cheia · Esc sair</span>
       <div class="control-buttons">
         <button id="prev" type="button" aria-label="Slide anterior">←</button>
-        <span class="slide-count" id="count" aria-live="polite">01 / 09</span>
+        <span class="slide-count" id="count" aria-live="polite">01 / 10</span>
         <button id="next" type="button" aria-label="Próximo slide">→</button>
         <button id="notes-toggle" type="button" aria-pressed="false">Notas (N)</button>
       </div>
