@@ -1,0 +1,1027 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07111f">
+  <title>Cibersegurança Preventiva com IA — TechDay</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #07111f;
+      --panel: #0d1b2b;
+      --panel-2: #102338;
+      --text: #f3f7fb;
+      --muted: #a9bacb;
+      --line: #263a50;
+      --cyan: #64e2dc;
+      --blue: #82b7ff;
+      --amber: #ffd27d;
+      --red: #ff8c8c;
+      --green: #86e3ad;
+      --scale: 1;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; background: var(--bg); }
+    button, a { font: inherit; }
+    a { color: var(--cyan); text-underline-offset: 3px; }
+    a:hover { color: white; }
+
+    .deck {
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      background:
+        radial-gradient(ellipse at 85% 7%, rgba(48, 111, 146, .19), transparent 35%),
+        radial-gradient(ellipse at 10% 95%, rgba(44, 145, 138, .12), transparent 32%),
+        var(--bg);
+    }
+
+    .topbar, .controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 1rem clamp(1rem, 3vw, 3rem);
+      color: var(--muted);
+      font-size: .78rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .brand { color: var(--text); font-weight: 750; }
+    .topbar .event { color: var(--cyan); }
+    .progress { height: 2px; background: #142638; }
+    .progress span { display: block; height: 100%; width: 11.11%; background: var(--cyan); transition: width .25s ease; }
+
+    main {
+      width: min(100%, 1440px);
+      min-height: 0;
+      margin: auto;
+      padding: clamp(1.3rem, 4vh, 3.5rem) clamp(1.2rem, 5vw, 5rem);
+      display: grid;
+      align-items: center;
+    }
+
+    .slide {
+      display: none;
+      width: 100%;
+      min-height: min(70vh, 760px);
+      animation: appear .3s ease both;
+    }
+    .slide.active { display: flex; flex-direction: column; justify-content: center; }
+    @keyframes appear { from { opacity: .35; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+    .kicker {
+      display: flex;
+      align-items: center;
+      gap: .65rem;
+      margin: 0 0 1rem;
+      color: var(--cyan);
+      font-size: .77rem;
+      font-weight: 750;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+    .kicker::before { content: ""; width: 1.5rem; height: 2px; background: var(--cyan); }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 { max-width: 1000px; margin-bottom: 1.1rem; font-size: clamp(2.8rem, 6.6vw, 6.5rem); line-height: .98; letter-spacing: -.055em; }
+    h2 { margin-bottom: .7rem; font-size: clamp(2.2rem, 4.2vw, 4.2rem); line-height: 1.02; letter-spacing: -.04em; }
+    h3 { margin-bottom: .65rem; font-size: clamp(1.05rem, 1.55vw, 1.4rem); }
+    .subtitle { max-width: 800px; color: var(--muted); font-size: clamp(1.1rem, 2vw, 1.65rem); line-height: 1.5; }
+    .lead { max-width: 950px; color: var(--muted); font-size: clamp(1.1rem, 1.8vw, 1.5rem); line-height: 1.5; }
+    .accent { color: var(--cyan); }
+    .muted { color: var(--muted); }
+    .small { font-size: .85rem; color: var(--muted); line-height: 1.5; }
+
+    .cover {
+      position: relative;
+      overflow: hidden;
+      min-height: min(70vh, 700px);
+      justify-content: center;
+    }
+    .cover::after {
+      content: "";
+      position: absolute;
+      z-index: -1;
+      right: 5%;
+      bottom: 3%;
+      width: min(32vw, 420px);
+      aspect-ratio: 1;
+      border: 1px solid rgba(100, 226, 220, .28);
+      border-radius: 50%;
+      box-shadow: 0 0 0 36px rgba(100, 226, 220, .035), 0 0 0 76px rgba(100, 226, 220, .025);
+    }
+    .cover-question {
+      margin: 2.2rem 0 0;
+      padding: 1.1rem 1.25rem;
+      max-width: 790px;
+      border-left: 3px solid var(--cyan);
+      background: rgba(13, 27, 43, .78);
+      color: #dce9f5;
+      font-size: clamp(1.05rem, 1.6vw, 1.35rem);
+      line-height: 1.5;
+    }
+    .cover-question strong { display: block; margin-bottom: .2rem; color: var(--cyan); font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; }
+
+    .grid { display: grid; gap: 1rem; }
+    .metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 1.6rem 0 1.2rem; }
+    .metric, .card, .case, .role, .stage, .flow-panel {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: linear-gradient(145deg, rgba(16, 35, 56, .92), rgba(10, 23, 37, .96));
+    }
+    .metric { min-height: 190px; padding: clamp(1rem, 2vw, 1.65rem); }
+    .metric-number { display: block; margin-bottom: .5rem; color: var(--cyan); font-size: clamp(2.3rem, 4vw, 4rem); font-weight: 800; letter-spacing: -.05em; line-height: 1; }
+    .metric p { margin: 0; color: #dce7f1; font-size: .98rem; line-height: 1.45; }
+    .metric .qualifier { display: block; margin-top: .65rem; color: var(--muted); font-size: .76rem; line-height: 1.4; }
+    .caveat { display: flex; gap: .75rem; align-items: flex-start; max-width: 980px; padding: .8rem 1rem; border: 1px solid #554a36; border-radius: 10px; color: #f1dbb0; background: rgba(92, 69, 28, .18); font-size: .86rem; line-height: 1.45; }
+    .caveat b { color: var(--amber); white-space: nowrap; }
+
+    .cases { grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: 1rem; }
+    .case { display: flex; flex-direction: column; min-height: 300px; padding: 1.25rem; }
+    .case .label { margin-bottom: .8rem; color: var(--cyan); font-size: .72rem; font-weight: 750; letter-spacing: .12em; text-transform: uppercase; }
+    .case p { color: #ccdae6; font-size: .92rem; line-height: 1.5; }
+    .case .takeaway { margin-top: auto; padding-top: .7rem; border-top: 1px solid var(--line); color: var(--text); font-size: .86rem; line-height: 1.45; }
+    .case .takeaway b { color: var(--cyan); }
+
+    .compare { grid-template-columns: 1fr 1fr; margin-top: 1.1rem; }
+    .flow-panel { padding: clamp(1rem, 2.2vw, 1.7rem); }
+    .flow-panel h3 { display: flex; align-items: center; gap: .65rem; }
+    .flow-panel.old h3 { color: var(--amber); }
+    .flow-panel.new h3 { color: var(--cyan); }
+    .flow { display: flex; flex-wrap: wrap; align-items: center; gap: .45rem; margin-top: 1.2rem; }
+    .node { padding: .6rem .7rem; border: 1px solid var(--line); border-radius: 8px; background: rgba(7, 17, 31, .72); color: #e8eff7; font-size: .78rem; font-weight: 650; }
+    .old .node:last-child { border-color: #806747; color: var(--amber); }
+    .new .node:nth-last-child(-n+4) { border-color: #31736f; }
+    .arrow { color: #6f849a; }
+    .takeaway-banner { margin-top: 1rem; padding: 1rem 1.1rem; border-left: 3px solid var(--cyan); background: rgba(100, 226, 220, .07); color: #dce9f5; font-size: 1.05rem; line-height: 1.5; }
+
+    .pipeline { grid-template-columns: repeat(6, minmax(0, 1fr)); margin: 1.3rem 0; }
+    .stage { position: relative; min-height: 205px; padding: 1rem .9rem; }
+    .stage:not(:last-child)::after { content: "›"; position: absolute; z-index: 2; top: 44%; right: -.68rem; color: var(--cyan); font-size: 1.65rem; font-weight: 800; }
+    .stage-num { color: var(--cyan); font-size: .68rem; font-weight: 800; letter-spacing: .12em; }
+    .stage h3 { margin: .5rem 0; }
+    .stage p { margin: 0; color: var(--muted); font-size: .78rem; line-height: 1.5; }
+    .controls-strip { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1rem 1.15rem; border: 1px solid #31546d; border-radius: 12px; background: rgba(17, 48, 69, .42); }
+    .controls-strip strong { color: var(--cyan); }
+    .tool-pills { display: flex; flex-wrap: wrap; gap: .45rem; }
+    .pill { padding: .36rem .58rem; border: 1px solid #35516a; border-radius: 100px; color: #cfdae5; font-size: .74rem; }
+
+    .lab-layout { display: grid; grid-template-columns: 1.05fr .95fr; gap: 1rem; margin-top: 1rem; }
+    .code-card { overflow: hidden; border: 1px solid var(--line); border-radius: 13px; background: #050c15; }
+    .code-head { display: flex; justify-content: space-between; padding: .7rem .9rem; border-bottom: 1px solid #213347; color: var(--muted); font-size: .7rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+    .code-head .before { color: var(--red); }
+    .code-head .after { color: var(--green); }
+    pre { overflow: auto; margin: 0; padding: .8rem 1rem; color: #d9e7f5; font: .78rem/1.55 ui-monospace, SFMono-Regular, Consolas, monospace; white-space: pre-wrap; }
+    .lab-right { display: flex; flex-direction: column; gap: .8rem; }
+    .finding { padding: .8rem .9rem; border: 1px solid #4f3036; border-radius: 10px; background: rgba(97, 37, 44, .2); }
+    .finding.pass { border-color: #315845; background: rgba(26, 89, 58, .16); }
+    .finding b { display: block; margin-bottom: .22rem; color: var(--red); font-size: .83rem; }
+    .finding.pass b { color: var(--green); }
+    .finding span { color: var(--muted); font-size: .78rem; line-height: 1.45; }
+    .human-loop { display: flex; flex-wrap: wrap; align-items: center; gap: .35rem; margin-top: auto; padding: .75rem; border: 1px solid var(--line); border-radius: 10px; color: #dce7f1; font-size: .77rem; }
+    .human-loop b { color: var(--cyan); }
+
+    .roles { grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: 1.3rem; }
+    .role { min-height: 250px; padding: 1.25rem; }
+    .role .role-name { color: var(--cyan); font-size: .75rem; font-weight: 750; letter-spacing: .12em; text-transform: uppercase; }
+    .role ul { min-height: 115px; padding-left: 1.1rem; color: #c9d7e4; font-size: .88rem; line-height: 1.65; }
+    .role blockquote { margin: .6rem 0 0; padding: .6rem 0 0; border-top: 1px solid var(--line); color: var(--text); font-size: .87rem; font-weight: 650; }
+
+    .shadow-grid { grid-template-columns: 1fr auto 1fr; align-items: center; margin-top: 1.6rem; }
+    .shadow-path { min-height: 260px; padding: 1.2rem; border: 1px solid var(--line); border-radius: 15px; background: rgba(13, 27, 43, .8); }
+    .shadow-path.unsafe { border-color: #69434a; }
+    .shadow-path.safe { border-color: #2d685d; }
+    .path-label { display: inline-block; margin-bottom: 1rem; color: var(--red); font-size: .73rem; font-weight: 750; letter-spacing: .12em; text-transform: uppercase; }
+    .safe .path-label { color: var(--green); }
+    .path-step { display: flex; align-items: center; gap: .65rem; padding: .58rem 0; color: #d4e0eb; font-size: .92rem; }
+    .path-step .bullet { display: grid; width: 1.6rem; height: 1.6rem; place-items: center; flex: 0 0 auto; border-radius: 50%; background: rgba(100, 226, 220, .12); color: var(--cyan); font-size: .72rem; font-weight: 800; }
+    .unsafe .bullet { background: rgba(255, 140, 140, .12); color: var(--red); }
+    .path-arrow { color: var(--muted); font-size: 1.25rem; }
+    .risk-tag { margin-top: .8rem; padding: .6rem .7rem; border-radius: 8px; background: rgba(255, 140, 140, .08); color: #ffc1c1; font-size: .79rem; }
+
+    .close-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 1.4rem 0; }
+    .commitment { min-height: 145px; padding: 1rem; border-top: 2px solid var(--cyan); background: rgba(13, 27, 43, .75); }
+    .commitment span { display: block; margin-bottom: .7rem; color: var(--cyan); font-size: .7rem; font-weight: 750; letter-spacing: .12em; text-transform: uppercase; }
+    .commitment q { color: #e8eff7; font-size: .95rem; line-height: 1.5; }
+    .final-line { max-width: 900px; margin: 0; color: var(--text); font-size: clamp(1.55rem, 3vw, 2.65rem); font-weight: 720; letter-spacing: -.035em; line-height: 1.2; }
+
+    .sources { min-height: 1.4rem; padding: 0 clamp(1rem, 3vw, 3rem) .5rem; color: #8397aa; font-size: .68rem; }
+    .sources a { color: #92b9d6; }
+    .sources .lab-btn { display: inline-block; margin-left: .6rem; padding: .35rem .9rem; border-radius: 999px; background: #22d3ee; color: #04202a; font-weight: 800; font-size: .8rem; text-decoration: none; }
+    .sources .lab-btn:hover, .sources .lab-btn:focus-visible { background: #67e8f9; }
+    .notes {
+      display: none;
+      position: fixed;
+      z-index: 10;
+      right: 1rem;
+      bottom: 4.6rem;
+      width: min(680px, calc(100vw - 2rem));
+      max-height: min(58vh, 520px);
+      overflow: auto;
+      padding: 1.15rem 1.3rem;
+      border: 1px solid #3a5b75;
+      border-radius: 14px;
+      background: rgba(5, 13, 23, .97);
+      box-shadow: 0 18px 60px rgba(0,0,0,.45);
+      color: #d9e5f0;
+      font-size: .86rem;
+      line-height: 1.55;
+    }
+    .notes.open { display: block; }
+    .notes h3 { color: var(--cyan); font-size: .95rem; }
+    .notes p:last-child, .notes ol:last-child { margin-bottom: 0; }
+    .notes strong { color: white; }
+    .notes code { color: var(--cyan); font-family: ui-monospace, Consolas, monospace; }
+    .notes li { margin-bottom: .35rem; }
+
+    .controls { padding-top: .5rem; padding-bottom: 1rem; font-size: .7rem; letter-spacing: .04em; text-transform: none; }
+    .control-buttons { display: flex; align-items: center; gap: .5rem; }
+    .controls button { padding: .48rem .75rem; border: 1px solid #30485f; border-radius: 8px; background: #0c1a29; color: var(--text); cursor: pointer; }
+    .controls button:hover, .controls button:focus-visible { border-color: var(--cyan); outline: none; }
+    .controls button:disabled { opacity: .4; cursor: default; }
+    .slide-count { min-width: 3.7rem; text-align: center; color: var(--text); font-variant-numeric: tabular-nums; }
+
+    @media (max-width: 900px) {
+      .metrics, .cases, .roles { grid-template-columns: 1fr; }
+      .metric { min-height: auto; }
+      .pipeline { grid-template-columns: repeat(3, 1fr); }
+      .stage:nth-child(3)::after { display: none; }
+      .case, .role { min-height: auto; }
+      .role ul { min-height: auto; }
+      .shadow-grid { grid-template-columns: 1fr; }
+      .path-arrow { transform: rotate(90deg); justify-self: center; }
+      .lab-layout { grid-template-columns: 1fr; }
+      .slide { min-height: auto; }
+      main { align-items: start; }
+    }
+    @media (max-width: 600px) {
+      .compare, .close-grid { grid-template-columns: 1fr; }
+      .pipeline { grid-template-columns: repeat(2, 1fr); }
+      .stage:nth-child(3)::after { display: block; }
+      .stage:nth-child(even)::after { display: none; }
+      .topbar { font-size: .65rem; }
+      .controls .hint { display: none; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
+    }
+    @media print {
+      .deck { min-height: auto; background: #07111f; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+      .topbar, .progress, .controls, .notes { display: none !important; }
+      main { display: block; width: auto; padding: 0; }
+      .slide, .slide.active { display: flex !important; min-height: 100vh; page-break-after: always; padding: 2rem; }
+      .sources { padding: 0 2rem 1rem; }
+      a { color: #92b9d6; }
+    }
+  </style>
+
+<style id="interactive-redesign">
+/* === Visual redesign: preserved content, enhanced presentation layer === */
+:root{
+  --glass:rgba(13,25,47,.72);
+  --glass-strong:rgba(15,30,55,.9);
+  --line-soft:rgba(148,163,184,.18);
+  --cyan-soft:rgba(34,211,238,.16);
+  --blue-soft:rgba(59,130,246,.16);
+  --green-soft:rgba(34,197,94,.14);
+  --red-soft:rgba(239,68,68,.14);
+  --amber-soft:rgba(245,158,11,.14);
+  --shadow-xl:0 24px 70px rgba(0,0,0,.34);
+}
+
+/* Atmospheric background */
+body{
+  background:
+    radial-gradient(circle at 12% 8%, rgba(34,211,238,.10), transparent 30%),
+    radial-gradient(circle at 88% 82%, rgba(59,130,246,.10), transparent 34%),
+    linear-gradient(135deg,#07111f 0%,#0a1628 48%,#07101d 100%);
+}
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  background-image:
+    linear-gradient(rgba(148,163,184,.025) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(148,163,184,.025) 1px,transparent 1px);
+  background-size:42px 42px;
+  mask-image:linear-gradient(to bottom,rgba(0,0,0,.7),transparent 85%);
+  z-index:-1;
+}
+
+/* Slide entrance */
+.slide{
+  isolation:isolate;
+}
+.slide.active{
+  animation:slideIn .48s cubic-bezier(.2,.75,.2,1);
+}
+@keyframes slideIn{
+  from{opacity:.2;transform:translateY(12px) scale(.992)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+
+/* Stronger content containers */
+.card,.flow-panel,.pipeline,.controls-strip,.role-card,.closing{
+  background:linear-gradient(145deg,rgba(15,31,55,.88),rgba(8,19,34,.72));
+  border:1px solid var(--line-soft);
+  box-shadow:0 12px 40px rgba(0,0,0,.20);
+  backdrop-filter:blur(14px);
+}
+.card,.flow-panel,.role-card{
+  transition:transform .28s ease,border-color .28s ease,box-shadow .28s ease;
+}
+.card:hover,.flow-panel:hover,.role-card:hover{
+  transform:translateY(-3px);
+  border-color:rgba(34,211,238,.30);
+  box-shadow:0 18px 50px rgba(0,0,0,.28);
+}
+
+/* Flow panels become visual journeys */
+.flow-panel{
+  position:relative;
+  overflow:hidden;
+}
+.flow-panel::before{
+  content:"";
+  position:absolute;
+  left:0;right:0;top:0;
+  height:2px;
+  background:linear-gradient(90deg,transparent,#22d3ee,#3b82f6,transparent);
+  opacity:.85;
+}
+.flow{
+  position:relative;
+  gap:12px;
+  align-items:stretch;
+}
+.flow .node{
+  position:relative;
+  min-width:112px;
+  padding:15px 13px 13px;
+  border-radius:15px;
+  border:1px solid rgba(148,163,184,.16);
+  background:rgba(7,18,32,.72);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.035);
+  transition:transform .25s ease,border-color .25s ease,background .25s ease;
+}
+.flow .node::before{
+  content:attr(data-step);
+  display:flex;
+  width:24px;height:24px;
+  margin-bottom:8px;
+  align-items:center;justify-content:center;
+  border-radius:50%;
+  font-size:11px;font-weight:800;
+  color:#dffaff;
+  background:rgba(34,211,238,.14);
+  border:1px solid rgba(34,211,238,.34);
+}
+.flow .node:hover{
+  transform:translateY(-5px);
+  border-color:rgba(34,211,238,.5);
+  background:rgba(12,35,57,.9);
+}
+.flow .arrow{
+  position:relative;
+  min-width:25px;
+  opacity:.85;
+}
+.flow .arrow::after{
+  content:"";
+  position:absolute;
+  top:50%;
+  left:0;right:0;
+  height:1px;
+  background:linear-gradient(90deg,rgba(34,211,238,.15),rgba(34,211,238,.75));
+  animation:flowPulse 2.4s ease-in-out infinite;
+}
+@keyframes flowPulse{
+  0%,100%{opacity:.35}
+  50%{opacity:1}
+}
+
+/* Preventive path gets a clear "safe route" visual */
+.flow-panel.preventive,.flow-panel:has(.preventive){
+  border-color:rgba(34,197,94,.18);
+}
+.flow-panel.preventive .node{
+  border-color:rgba(34,197,94,.16);
+}
+.flow-panel.preventive .node::before{
+  color:#dcffe7;
+  background:var(--green-soft);
+  border-color:rgba(34,197,94,.34);
+}
+
+/* Pipeline / SDLC */
+.pipeline{
+  position:relative;
+  padding:18px;
+  border-radius:18px;
+}
+.pipeline::before{
+  content:"";
+  position:absolute;
+  left:6%;right:6%;
+  top:50%;
+  height:2px;
+  background:linear-gradient(90deg,#22d3ee,#3b82f6,#22c55e,#f59e0b);
+  opacity:.25;
+}
+.stage{
+  position:relative;
+  z-index:1;
+  transition:transform .25s ease,filter .25s ease;
+}
+.stage:hover{
+  transform:translateY(-6px) scale(1.015);
+  filter:brightness(1.12);
+}
+.stage .stage-dot{
+  box-shadow:0 0 0 6px rgba(34,211,238,.06),0 0 24px rgba(34,211,238,.12);
+}
+
+/* Controls as an explicit IA/control layer */
+.controls-strip{
+  border-radius:16px;
+  position:relative;
+  overflow:hidden;
+}
+.controls-strip::before{
+  content:"IA + CONTROLES";
+  position:absolute;
+  top:0;left:0;
+  padding:5px 9px;
+  border-radius:0 0 8px 0;
+  font-size:9px;
+  font-weight:800;
+  letter-spacing:.14em;
+  color:#bff7ff;
+  background:rgba(34,211,238,.12);
+}
+
+/* Code panels */
+pre,code,.code{
+  border-radius:14px !important;
+}
+pre{
+  border:1px solid rgba(148,163,184,.14) !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.03),0 10px 30px rgba(0,0,0,.18);
+}
+
+/* Badges / labels */
+.pill{
+  transition:transform .2s ease,background .2s ease,border-color .2s ease;
+}
+.pill:hover{
+  transform:translateY(-2px);
+  border-color:rgba(34,211,238,.35);
+}
+
+/* Interactive cue */
+.interactive-hint{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  margin-top:10px;
+  font-size:11px;
+  color:#8ea5bd;
+  letter-spacing:.02em;
+}
+.interactive-hint::before{
+  content:"";
+  width:7px;height:7px;
+  border-radius:50%;
+  background:#22d3ee;
+  box-shadow:0 0 12px rgba(34,211,238,.75);
+  animation:hintPulse 1.8s ease-in-out infinite;
+}
+@keyframes hintPulse{
+  0%,100%{opacity:.45;transform:scale(.85)}
+  50%{opacity:1;transform:scale(1)}
+}
+
+/* Focus states for keyboard users */
+.flow .node:focus-visible,.card:focus-visible,.stage:focus-visible{
+  outline:2px solid #22d3ee;
+  outline-offset:3px;
+}
+
+/* More readable responsive flow */
+@media (max-width:900px){
+  .flow{
+    overflow-x:auto;
+    padding-bottom:8px;
+    scrollbar-width:thin;
+  }
+  .flow .node{min-width:128px}
+  .flow .arrow{min-width:18px}
+  .pipeline{
+    overflow-x:auto;
+  }
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:.001ms !important;
+    animation-iteration-count:1 !important;
+    scroll-behavior:auto !important;
+    transition-duration:.001ms !important;
+  }
+}
+</style>
+
+
+<style id="brand-palette-override">
+/* === Paleta extraída do logotipo fornecido === */
+:root{
+  --brand-navy:#0A263E;
+  --brand-green:#34D330;
+  --brand-white:#FFFFFF;
+  --brand-gray:#506673;
+  --brand-green-soft:#D3F5D5;
+
+  /* Existing presentation variables mapped to the brand */
+  --bg:#0A263E;
+  --cyan:#34D330;
+  --blue:#506673;
+  --amber:#D3F5D5;
+  --red:#E45757;
+  --green:#34D330;
+}
+
+/* Fundo e atmosfera */
+body{
+  background:
+    radial-gradient(circle at 12% 8%, rgba(52,211,48,.12), transparent 30%),
+    radial-gradient(circle at 88% 82%, rgba(80,102,115,.14), transparent 34%),
+    linear-gradient(135deg,#071D30 0%,#0A263E 48%,#081C2E 100%);
+}
+body::before{
+  background-image:
+    linear-gradient(rgba(211,245,213,.025) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(211,245,213,.025) 1px,transparent 1px);
+}
+
+/* Destaques, títulos e elementos de marca */
+h1,h2,h3,
+.title,.headline{
+  text-shadow:0 0 28px rgba(52,211,48,.08);
+}
+
+.accent,.highlight,.kicker{
+  color:var(--brand-green) !important;
+}
+
+.badge,.pill{
+  border-color:rgba(52,211,48,.28) !important;
+  background:rgba(52,211,48,.08) !important;
+}
+
+.progress,
+.progress-bar{
+  background:var(--brand-green) !important;
+  box-shadow:0 0 14px rgba(52,211,48,.35);
+}
+
+/* Cards */
+.card:hover,.flow-panel:hover,.role-card:hover{
+  border-color:rgba(52,211,48,.38);
+  box-shadow:0 18px 50px rgba(0,0,0,.28),0 0 28px rgba(52,211,48,.06);
+}
+
+/* Fluxos: verde = caminho preventivo / IA */
+.flow .node::before{
+  color:#E8FFE8;
+  background:rgba(52,211,48,.12);
+  border-color:rgba(52,211,48,.38);
+}
+.flow .node:hover{
+  border-color:rgba(52,211,48,.55);
+  background:rgba(20,49,43,.88);
+}
+.flow .arrow::after{
+  background:linear-gradient(90deg,rgba(80,102,115,.18),rgba(52,211,48,.82));
+}
+.flow-panel::before{
+  background:linear-gradient(90deg,transparent,#506673,#34D330,transparent);
+}
+
+/* Caminho preventivo */
+.flow-panel.preventive,
+.flow-panel:has(.preventive){
+  border-color:rgba(52,211,48,.24);
+}
+.flow-panel.preventive .node,
+.flow-panel:has(.preventive) .node{
+  border-color:rgba(52,211,48,.20);
+}
+
+/* Pipeline / SDLC */
+.pipeline::before{
+  background:linear-gradient(90deg,#506673,#34D330,#34D330,#506673);
+  opacity:.34;
+}
+.stage:hover{
+  filter:brightness(1.10);
+}
+.stage .stage-dot{
+  box-shadow:0 0 0 6px rgba(52,211,48,.07),0 0 24px rgba(52,211,48,.16);
+}
+
+/* Faixa de controles / IA */
+.controls-strip::before{
+  color:#E8FFE8;
+  background:rgba(52,211,48,.12);
+}
+.controls-strip{
+  border-color:rgba(52,211,48,.16);
+}
+
+/* Código / blocos de destaque */
+pre{
+  border-color:rgba(80,102,115,.28) !important;
+}
+
+/* Indicadores interativos */
+.interactive-hint::before{
+  background:var(--brand-green);
+  box-shadow:0 0 12px rgba(52,211,48,.75);
+}
+
+/* Foco acessível */
+.flow .node:focus-visible,.card:focus-visible,.stage:focus-visible{
+  outline-color:var(--brand-green);
+}
+
+/* Barra/controles de navegação */
+button:hover,
+.nav button:hover,
+.control:hover{
+  border-color:rgba(52,211,48,.42);
+}
+</style>
+
+</head>
+<body>
+  <div class="deck">
+    <header class="topbar">
+      <span class="brand">TECHDAY <span class="event">/ SEGURANÇA & IA</span></span>
+      <span>30 OUT 2026 · <span id="top-count">01 / 09</span></span>
+    </header>
+    <div class="progress" aria-hidden="true"><span id="progress"></span></div>
+
+    <main id="slides">
+      <section class="slide cover active" aria-label="Slide 1: Capa">
+        <p class="kicker">Menos surpresa. Mais prevenção.</p>
+        <h1>Cibersegurança<br><span class="accent">Preventiva</span> com IA</h1>
+        <p class="subtitle">Como encontrar e reduzir riscos antes que eles se tornem incidentes.</p>
+        <p class="small">9 slides · duração estimada: 18 minutos</p>
+        <p class="cover-question"><strong>Uma pergunta para começar</strong>Se uma vulnerabilidade crítica aparecesse hoje no nosso sistema, quanto tempo levaríamos para descobri-la — e corrigi-la?</p>
+        <aside class="notes">
+          <h3>Objetivo · 1 min 30 s</h3>
+          <p><strong>O que dizer:</strong> Abra com a pergunta e dê um instante para a audiência pensar. Não peça uma resposta técnica exata; destaque que, sem um fluxo de detecção, prioridade, correção e validação, o tempo depende de alguém encontrar o problema por acaso. O foco de hoje é encurtar essa janela. A IA entra como apoio; não como selo de segurança nem substituta de responsabilidade.</p>
+          <p><strong>Mensagem:</strong> prevenir é reduzir o tempo entre risco e ação.</p>
+          <p><strong>Transição:</strong> “Por que esse tempo importa tanto agora? Vamos olhar para o que os dados mostram — e para o que eles não mostram.”</p>
+        </aside>
+      </section>
+
+      <section class="slide" aria-label="Slide 2: A janela de exposição">
+        <p class="kicker">01 · O problema</p>
+        <h2>A janela de exposição<br><span class="accent">está sob pressão</span></h2>
+        <p class="lead">Mais automação no ataque aumenta a pressão sobre a detecção e a correção. O risco de negócio aparece quando a resposta chega tarde.</p>
+        <div class="grid metrics">
+          <article class="metric"><span class="metric-number">US$ 4,99 mi</span><p>Custo médio global de uma violação de dados.</p><span class="qualifier">Estudo IBM 2026 · 602 organizações estudadas · média global reportada.</span></article>
+          <article class="metric"><span class="metric-number">~1 em 5</span><p>Organizações reportaram uma violação relacionada a sistemas de IA.</p><span class="qualifier">“Relacionada a IA” significa ataque a modelos ou aplicações de IA — não todo ataque com IA.</span></article>
+          <article class="metric"><span class="metric-number">US$ 1,93 mi</span><p>Economia média associada a IA e automação extensivas na segurança.</p><span class="qualifier">Estimativa observacional do estudo; não é garantia causal para cada organização.</span></article>
+        </div>
+        <div class="caveat"><b>Leitura correta</b><span>Dados de uma pesquisa de violações, não previsão para uma empresa específica. A oportunidade está em encontrar, priorizar e corrigir antes que a exposição vire impacto.</span></div>
+        <div class="sources">Fonte: <a href="https://www.ibm.com/think/x-force/2026-cost-of-a-data-breach-ai-adversaries-enterprise-risk" target="_blank" rel="noreferrer">IBM Cost of a Data Breach 2026</a> · <a href="https://newsroom.ibm.com/2026-07-29-ibm-study-one-in-four-malicious-breaches-are-ai-enabled,-costing-companies-6-million-on-average" target="_blank" rel="noreferrer">comunicado IBM, 29 jul. 2026</a>.</div>
+        <aside class="notes">
+          <h3>Objetivo · 2 min</h3>
+          <p><strong>O que dizer:</strong> Explique cada número com seu contexto. O custo médio de US$ 4,99 milhões é global. “Uma em cinco” refere-se a organizações que reportaram um incidente envolvendo seus sistemas de IA; não significa que 20% de todos os ataques usaram IA. A estimativa de US$ 1,93 milhão é a diferença média associada à adoção extensiva de IA e automação defensivas, não uma economia garantida.</p>
+          <p>O ponto para times de produto não é comprar uma ferramenta por causa de uma média. É deixar de depender de descoberta acidental e investir em fluxo: encontrar cedo, atribuir dono, priorizar contexto e validar a correção.</p>
+          <p><strong>Mensagem:</strong> a velocidade de resposta muda a exposição, mas estatística de mercado não substitui avaliação do nosso risco.</p>
+          <p><strong>Transição:</strong> “E isso não é só uma projeção sobre IA: os exemplos publicados mostram superfícies bem familiares.”</p>
+        </aside>
+      </section>
+
+      <section class="slide" aria-label="Slide 3: Casos e sinais">
+        <p class="kicker">02 · O que já vimos</p>
+        <h2>Casos reais.<br><span class="accent">Lições para quem constrói.</span></h2>
+        <div class="grid cases">
+          <article class="case">
+            <span class="label">Incidente · Hugging Face · jul. 2026</span>
+            <h3>Pipeline de dados como ponto de entrada</h3>
+            <p>A empresa relatou execução de código em processamento de datasets, seguida de acesso a nós, credenciais e movimento lateral. Descreveu o uso de agentes automatizados pelo invasor; a avaliação de impacto ainda estava em andamento.</p>
+            <div class="takeaway"><b>Para o time:</b> isolar workers, restringir credenciais e registrar ações de pipelines.</div>
+          </article>
+          <article class="case">
+            <span class="label">Análise técnica · Microsoft · nov. 2025</span>
+            <h3>Serviço legítimo usado como canal</h3>
+            <p>O SesameOp usou a API Assistants da OpenAI como canal de comando e controle. A Microsoft informou que o backdoor não usava modelos nem recursos de agentes; abusava da API como relay.</p>
+            <div class="takeaway"><b>Para o time:</b> serviço confiável também precisa de controles, telemetria e revisão de abuso.</div>
+          </article>
+          <article class="case">
+            <span class="label">Sinal econômico · IBM · 2026</span>
+            <h3>Automação dos dois lados</h3>
+            <p>No estudo com 602 organizações, a IBM estima que 1 em 4 violações maliciosas foi habilitada por IA; o custo médio reportado para esse grupo foi de US$ 6 milhões. O estudo também associa automação defensiva a menor custo.</p>
+            <div class="takeaway"><b>Para o time:</b> reduzir tempo de exposição é uma decisão de produto e operação.</div>
+          </article>
+        </div>
+        <div class="sources">Fontes primárias: <a href="https://huggingface.co/blog/security-incident-july-2026" target="_blank" rel="noreferrer">Hugging Face, incidente de jul. 2026 (relato da organização; investigação em curso)</a> · <a href="https://www.microsoft.com/en-us/security/blog/2025/11/03/sesameop-novel-backdoor-uses-openai-assistants-api-for-command-and-control/" target="_blank" rel="noreferrer">Microsoft, SesameOp, 3 nov. 2025</a> · <a href="https://www.ibm.com/think/x-force/2026-cost-of-a-data-breach-ai-adversaries-enterprise-risk" target="_blank" rel="noreferrer">IBM, estudo 2026</a> · <a href="https://newsroom.ibm.com/2026-07-29-ibm-study-one-in-four-malicious-breaches-are-ai-enabled,-costing-companies-6-million-on-average" target="_blank" rel="noreferrer">comunicado IBM sobre violações habilitadas por IA</a>.</div>
+        <aside class="notes">
+          <h3>Objetivo · 2 min 30 s</h3>
+          <p><strong>O que dizer:</strong> Separe fato publicado de interpretação. No caso Hugging Face, atribua a descrição à própria organização e diga que a avaliação de impacto estava em curso na publicação. Não afirme que dados de clientes foram expostos nem que houve alteração de modelos públicos: a empresa disse não ter encontrado evidência disso naquele momento. Use o caso para falar de workers de processamento, segredos e privilégio mínimo.</p>
+          <p>No SesameOp, a Microsoft descreve um backdoor de espionagem e a API como canal de comunicação. Isso não é uma vulnerabilidade da API, nem evidência de que um modelo de IA foi usado para gerar malware. A lição é governar o uso de serviços e observar tráfego e identidade.</p>
+          <p>O estudo IBM é evidência agregada, não um terceiro incidente específico. Enquadre-o como sinal econômico e não como causalidade garantida.</p>
+          <p><strong>Mensagem:</strong> a superfície muda; os fundamentos continuam: isolamento, privilégios mínimos, observabilidade e correção.</p>
+          <p><strong>Transição:</strong> “A resposta não é correr atrás de alertas no fim. É mover a descoberta para o fluxo de desenvolvimento.”</p>
+        </aside>
+      </section>
+
+      <section class="slide" aria-label="Slide 4: De reativa a preventiva">
+        <p class="kicker">03 · A mudança de paradigma</p>
+        <h2>De reagir ao incidente<br>para <span class="accent">reduzir a janela.</span></h2>
+        <div class="grid compare">
+          <article class="flow-panel old">
+            <h3>Reativo · risco descoberto tarde</h3>
+            <div class="flow">
+              <span class="node" data-step="1">Código</span><span class="arrow">→</span><span class="node" data-step="2">Deploy</span><span class="arrow">→</span><span class="node" data-step="3">Falha</span><span class="arrow">→</span><span class="node" data-step="4">Ataque</span><span class="arrow">→</span><span class="node" data-step="5">Alerta</span><span class="arrow">→</span><span class="node" data-step="6">Investigar</span><span class="arrow">→</span><span class="node" data-step="7">Corrigir</span>
+            </div>
+          </article>
+          <article class="flow-panel new">
+            <h3>Preventivo · agir antes da produção</h3>
+            <div class="flow">
+              <span class="node" data-step="8">Código</span><span class="arrow">→</span><span class="node" data-step="9">Analisar</span><span class="arrow">→</span><span class="node" data-step="10">Detectar</span><span class="arrow">→</span><span class="node" data-step="11">Priorizar</span><span class="arrow">→</span><span class="node" data-step="12">Sugerir</span><span class="arrow">→</span><span class="node" data-step="13">Revisar</span><span class="arrow">→</span><span class="node" data-step="14">Testar</span><span class="arrow">→</span><span class="node" data-step="15">Deploy</span>
+            </div>
+          </article>
+        </div>
+        <div class="takeaway-banner">A IA não precisa decidir se algo é seguro. Ela pode reduzir o tempo entre <strong>encontrar um risco</strong> e <strong>agir sobre ele</strong> — com validação humana.</div>
+        <aside class="notes">
+          <h3>Objetivo · 1 min 30 s</h3>
+          <p><strong>O que dizer:</strong> O fluxo reativo não desaparece; resposta a incidentes sempre será necessária. A mudança é parar de fazer dela nossa única oportunidade de descobrir uma falha. IA pode resumir findings, correlacionar sinais e sugerir uma correção, mas não aprova sozinha a mudança nem prova ausência de risco.</p>
+          <p><strong>Mensagem:</strong> IA encurta etapas; não remove responsabilidade, testes ou controles.</p>
+          <p><strong>Transição:</strong> “Então, onde esse apoio entra sem trocar o que já funciona?”</p>
+        </aside>
+      </section>
+
+      <section class="slide" aria-label="Slide 5: IA no SDLC">
+        <p class="kicker">04 · Segurança no ciclo</p>
+        <h2>IA + controles existentes<br><span class="accent">ao longo do SDLC.</span></h2>
+        <div class="grid pipeline">
+          <article class="stage"><span class="stage-num">01 / PLAN</span><h3>Planejar</h3><p>Threat modeling assistido<br>Requisitos e riscos</p></article>
+          <article class="stage"><span class="stage-num">02 / CODE</span><h3>Codificar</h3><p>Revisão de padrões<br>Detecção de secrets</p></article>
+          <article class="stage"><span class="stage-num">03 / BUILD</span><h3>Construir</h3><p>SCA e SBOM<br>Políticas no build</p></article>
+          <article class="stage"><span class="stage-num">04 / TEST</span><h3>Testar</h3><p>SAST / DAST<br>Casos e fuzzing assistidos</p></article>
+          <article class="stage"><span class="stage-num">05 / DEPLOY</span><h3>Implantar</h3><p>IaC e configuração<br>Policy as code</p></article>
+          <article class="stage"><span class="stage-num">06 / RUNTIME</span><h3>Operar</h3><p>Anomalias e correlação<br>Triagem de alertas</p></article>
+        </div>
+        <div class="controls-strip">
+          <span><strong>IA = camada de assistência.</strong> Não substitui scanners, testes nem julgamento humano.</span>
+          <div class="tool-pills" aria-label="Controles existentes"><span class="pill">SAST</span><span class="pill">DAST</span><span class="pill">SCA</span><span class="pill">SIEM / EDR</span><span class="pill">Revisão humana</span></div>
+        </div>
+        <div class="sources">Referência de prática: <a href="https://csrc.nist.gov/pubs/sp/800/218/final" target="_blank" rel="noreferrer">NIST SSDF 1.1</a> · princípios: <a href="https://www.cisa.gov/securebydesign" target="_blank" rel="noreferrer">CISA Secure by Design</a>.</div>
+        <aside class="notes">
+          <h3>Objetivo · 2 min 30 s</h3>
+          <p><strong>O que dizer:</strong> Percorra o pipeline sem transformar o slide em catálogo de ferramentas. Na etapa de plano, a IA ajuda a estruturar perguntas de threat modeling; no código, sinaliza padrões; no build, ajuda a entender dependências; no teste, auxilia a criar casos; no deploy, revisa configuração; em runtime, resume e correlaciona alertas.</p>
+          <p>Em todas as etapas, preserve o controle apropriado: SAST/DAST/SCA, testes, análise de configuração, SIEM/EDR e revisão por pessoas. A IA pode errar, alucinar, não ver contexto ou gerar mudanças inseguras. NIST SSDF e Secure by Design reforçam que práticas seguras fazem parte do ciclo, não que uma IA as substitui.</p>
+          <p><strong>Mensagem:</strong> adicionar assistência ao processo, não trocar controles por um chatbot.</p>
+          <p><strong>Transição:</strong> “Vamos concretizar com um exemplo local e pequeno: do finding à correção verificada.”</p>
+        </aside>
+      </section>
+
+      <section class="slide" aria-label="Slide 6: Mini laboratório">
+        <p class="kicker">05 · Mini laboratório · demonstração local</p>
+        <h2>Do finding à correção<br><span class="accent">verificada.</span></h2>
+        <div class="lab-layout">
+          <div>
+            <div class="code-card">
+              <div class="code-head"><span>Antes · fixture intencionalmente vulnerável</span><span class="before">NÃO EXECUTAR</span></div>
+              <pre><code>query = f"SELECT id, name FROM users WHERE id = {user_id}"
+db.execute(query)
+API_KEY = "DEMO_ONLY_NOT_A_REAL_SECRET"</code></pre>
+            </div>
+            <div class="code-card" style="margin-top:.7rem">
+              <div class="code-head"><span>Depois · parâmetros + segredo externo</span><span class="after">REVISAR E TESTAR</span></div>
+              <pre><code>db.execute(
+    "SELECT id, name FROM users WHERE id = ?",
+    (user_id,)
+)
+API_KEY = os.environ["API_KEY"]</code></pre>
+            </div>
+          </div>
+          <div class="lab-right">
+            <div class="finding"><b>CRITICAL — possível SQL Injection</b><span>Query SQL construída por interpolação.</span></div>
+            <div class="finding"><b>HIGH — segredo hardcoded</b><span>Valor demonstrativo; nunca é uma credencial real.</span></div>
+            <div class="finding pass"><b>AFTER — PASS · PASS</b><span>Query parametrizada · segredo lido do ambiente.</span></div>
+            <div class="human-loop"><b>IA sugere</b><span>→</span>Desenvolvedor revisa<span>→</span>Testes<span>→</span>Correção aprovada</div>
+          </div>
+        </div>
+        <div class="sources">Lab: <a href="lab/README.md">instruções e roteiro</a> · <code>docker compose up --build</code> em <code>lab/</code> (Demo Mode funciona offline). <a id="open-lab" class="lab-btn" href="http://localhost:8088/">Abrir experimento →</a></div>
+        <aside class="notes">
+          <h3>Objetivo · 4 min</h3>
+          <p><strong>Antes da apresentação:</strong> confira <code>lab/README.md</code> e suba o ambiente com <code>docker compose up --build</code>. Use o DEMO MODE (offline) como contingência.</p>
+          <ol>
+            <li><strong>Encontrar (45 s):</strong> no frontend, execute a análise sobre o código Vulnerável e mostre os findings CRITICAL e HIGH.</li>
+            <li><strong>Analisar (45 s):</strong> abra um card, mostre linha destacada, explicação e correção sugerida. Informe se é DEMO MODE ou REAL MODE (LLM).</li>
+            <li><strong>Validar (45 s):</strong> peça ao público para observar que a proposta não basta. O desenvolvedor confere a API do banco, o tratamento de erros, o tipo do parâmetro e os testes.</li>
+            <li><strong>Corrigir e verificar (1 min 45 s):</strong> selecione "Corrigido" e execute novamente: 0 vulnerabilidades. Explique que testes e revisão humana continuam necessários.</li>
+          </ol>
+          <p><strong>Segurança:</strong> o laboratório roda somente localmente em Docker isolado, com dados fictícios; não cole código corporativo em IA não aprovada.</p>
+          <p><strong>Mensagem:</strong> a IA acelera a triagem; a pessoa e os testes aprovam a mudança.</p>
+          <p><strong>Transição:</strong> “Esse fluxo só se sustenta quando cada papel tem uma ação clara.”</p>
+        </aside>
+      </section>
+
+      <section class="slide" aria-label="Slide 7: Ações por papel">
+        <p class="kicker">06 · Responsabilidade compartilhada</p>
+        <h2>O que muda <span class="accent">amanhã?</span></h2>
+        <div class="grid roles">
+          <article class="role">
+            <span class="role-name">Desenvolvedor · no código</span>
+            <ul><li>Corrigir no PR</li><li>Revisar dependências</li><li>Não versionar secrets</li><li>Validar sugestões da IA</li></ul>
+            <blockquote>“Segurança faz parte do código.”</blockquote>
+          </article>
+          <article class="role">
+            <span class="role-name">Tech Lead · no processo</span>
+            <ul><li>Incluir checks no CI/CD</li><li>Definir padrões e donos</li><li>Priorizar por risco</li><li>Estabelecer política de IA</li></ul>
+            <blockquote>“Segurança faz parte do processo.”</blockquote>
+          </article>
+          <article class="role">
+            <span class="role-name">Liderança · na gestão</span>
+            <ul><li>Acompanhar exposição e MTTR</li><li>Definir prioridades</li><li>Garantir recursos</li><li>Tratar risco como métrica</li></ul>
+            <blockquote>“Segurança faz parte da gestão de risco.”</blockquote>
+          </article>
+        </div>
+        <aside class="notes">
+          <h3>Objetivo · 1 min 30 s</h3>
+          <p><strong>O que dizer:</strong> Distribua responsabilidade sem atribuir culpa. O desenvolvedor tem ferramentas e padrões para corrigir no contexto; a liderança técnica define integração e prioridade; a gestão sustenta recursos, governança e métricas. Segurança depende do sistema e do processo — não de um herói individual.</p>
+          <p>Para começar, escolha um indicador acionável: tempo entre finding confirmado e correção, por severidade e exposição. Acompanhe também reincidência e cobertura dos checks, não apenas volume de alertas.</p>
+          <p><strong>Mensagem:</strong> cada papel tem alavancas diferentes e complementares.</p>
+          <p><strong>Transição:</strong> “Há mais um ponto de processo: a IA que já está sendo usada sem orientação.”</p>
+        </aside>
+      </section>
+
+      <section class="slide" aria-label="Slide 8: Shadow AI">
+        <p class="kicker">07 · Uso responsável</p>
+        <h2>IA sem governança<br>vira <span class="accent">nova superfície de risco.</span></h2>
+        <div class="grid shadow-grid">
+          <div class="shadow-path unsafe">
+            <span class="path-label">Fluxo sem política</span>
+            <div class="path-step"><span class="bullet">1</span>Desenvolvedor quer ajuda</div>
+            <div class="path-step"><span class="bullet">2</span>Ferramenta não aprovada</div>
+            <div class="path-step"><span class="bullet">3</span>Código, segredos ou dados internos</div>
+            <div class="risk-tag">Exposição possível: propriedade intelectual, credenciais, dados de clientes e arquitetura.</div>
+          </div>
+          <div class="path-arrow" aria-hidden="true">→</div>
+          <div class="shadow-path safe">
+            <span class="path-label">Fluxo recomendado</span>
+            <div class="path-step"><span class="bullet">1</span>Ferramenta corporativa aprovada</div>
+            <div class="path-step"><span class="bullet">2</span>Política + controles de dados</div>
+            <div class="path-step"><span class="bullet">3</span>Entrada minimizada e permitida</div>
+            <div class="path-step"><span class="bullet">4</span>Resultado revisado e testado</div>
+          </div>
+        </div>
+        <div class="takeaway-banner">Não é “usar IA ou não usar IA”. É <strong>usar IA com segurança</strong>: ferramenta aprovada, dados minimizados e validação.</div>
+        <aside class="notes">
+          <h3>Objetivo · 1 min 30 s</h3>
+          <p><strong>O que dizer:</strong> Não transforme isso em reprimenda. Pessoas procuram ferramentas que as ajudem a entregar. Se a organização não oferece caminho aprovado, o uso informal tende a crescer. Uma política útil diz o que pode ser enviado, quais ferramentas estão autorizadas, como tratar retenção e como revisar saídas.</p>
+          <p><strong>Mensagem:</strong> viabilizar uso seguro é mais eficaz do que só proibir.</p>
+          <p><strong>Transição:</strong> “Vamos fechar com uma ação que cada pessoa pode assumir já no próximo ciclo.”</p>
+        </aside>
+      </section>
+
+      <section class="slide" aria-label="Slide 9: Fechamento">
+        <p class="kicker">08 · Próximo passo</p>
+        <h2>Segurança é<br><span class="accent">responsabilidade de todos.</span></h2>
+        <div class="grid close-grid">
+          <div class="commitment"><span>Desenvolvedor</span><q>Posso evitar que uma vulnerabilidade chegue à produção.</q></div>
+          <div class="commitment"><span>Tech Lead</span><q>Posso transformar segurança em processo.</q></div>
+          <div class="commitment"><span>Liderança</span><q>Posso transformar segurança em prioridade mensurável.</q></div>
+        </div>
+        <p class="final-line">Não precisamos esperar o ataque para começar a trabalhar com segurança.</p>
+        <p class="small" style="margin-top:1rem">Prevenir é reduzir a oportunidade do atacante — antes que o problema vire um incidente.</p>
+        <aside class="notes">
+          <h3>Objetivo · 1 min</h3>
+          <p><strong>O que dizer:</strong> Retome a pergunta de abertura: quanto tempo levaríamos para descobrir e corrigir uma vulnerabilidade? Convide cada público a escolher uma ação concreta: um check no PR, um padrão no pipeline ou uma métrica de exposição. Não prometa risco zero; proponha aprendizado contínuo e colaboração.</p>
+          <p><strong>Mensagem:</strong> segurança preventiva é uma propriedade do sistema e do processo, construída em conjunto.</p>
+          <p><strong>Transição:</strong> encerre sem novo conteúdo e abra para perguntas.</p>
+          <p><strong>Fontes principais:</strong> IBM Cost of a Data Breach 2026, <a href="https://www.ibm.com/think/x-force/2026-cost-of-a-data-breach-ai-adversaries-enterprise-risk">análise IBM</a>; Hugging Face, <a href="https://huggingface.co/blog/security-incident-july-2026">comunicado de incidente de julho de 2026</a>; Microsoft, <a href="https://www.microsoft.com/en-us/security/blog/2025/11/03/sesameop-novel-backdoor-uses-openai-assistants-api-for-command-and-control/">análise SesameOp</a>; NIST, <a href="https://csrc.nist.gov/pubs/sp/800/218/final">SSDF 1.1</a>; CISA, <a href="https://www.cisa.gov/securebydesign">Secure by Design</a>. Data de referência do material: 25 out. 2026. Revise disponibilidade e atualizações das fontes antes da apresentação.</p>
+        </aside>
+      </section>
+    </main>
+
+    <footer class="controls">
+      <span class="hint">← → navegar · N notas · F tela cheia · Esc sair</span>
+      <div class="control-buttons">
+        <button id="prev" type="button" aria-label="Slide anterior">←</button>
+        <span class="slide-count" id="count" aria-live="polite">01 / 09</span>
+        <button id="next" type="button" aria-label="Próximo slide">→</button>
+        <button id="notes-toggle" type="button" aria-pressed="false">Notas (N)</button>
+      </div>
+    </footer>
+  </div>
+  <script>
+    (() => {
+      const slides = [...document.querySelectorAll(".slide")];
+      const notes = slides.map((slide) => slide.querySelector(".notes"));
+      const progress = document.getElementById("progress");
+      const count = document.getElementById("count");
+      const topCount = document.getElementById("top-count");
+      const previous = document.getElementById("prev");
+      const next = document.getElementById("next");
+      const notesToggle = document.getElementById("notes-toggle");
+      let current = 0;
+      let notesOpen = false;
+
+      function show(index) {
+        current = Math.max(0, Math.min(slides.length - 1, index));
+        slides.forEach((slide, i) => {
+          slide.classList.toggle("active", i === current);
+          slide.setAttribute("aria-hidden", String(i !== current));
+        });
+        const label = `${String(current + 1).padStart(2, "0")} / ${String(slides.length).padStart(2, "0")}`;
+        count.textContent = label;
+        topCount.textContent = label;
+        progress.style.width = `${((current + 1) / slides.length) * 100}%`;
+        previous.disabled = current === 0;
+        next.disabled = current === slides.length - 1;
+        notes.forEach((panel, i) => panel.classList.toggle("open", notesOpen && i === current));
+        history.replaceState(null, "", `#slide-${current + 1}`);
+      }
+
+      function toggleNotes() {
+        notesOpen = !notesOpen;
+        notesToggle.setAttribute("aria-pressed", String(notesOpen));
+        notesToggle.textContent = notesOpen ? "Ocultar notas (N)" : "Notas (N)";
+        show(current);
+      }
+
+      previous.addEventListener("click", () => show(current - 1));
+      next.addEventListener("click", () => show(current + 1));
+      notesToggle.addEventListener("click", toggleNotes);
+      document.addEventListener("keydown", (event) => {
+        if (event.altKey || event.ctrlKey || event.metaKey) return;
+        if (event.key === "ArrowRight" || event.key === "PageDown" || event.key === " ") show(current + 1);
+        else if (event.key === "ArrowLeft" || event.key === "PageUp") show(current - 1);
+        else if (event.key.toLowerCase() === "n") toggleNotes();
+        else if (event.key.toLowerCase() === "f") {
+          if (!document.fullscreenElement) document.documentElement.requestFullscreen?.();
+          else document.exitFullscreen?.();
+        } else if (event.key === "Home") show(0);
+        else if (event.key === "End") show(slides.length - 1);
+      });
+      const hashIndex = Number(location.hash.replace("#slide-", "")) - 1;
+      show(Number.isInteger(hashIndex) && hashIndex >= 0 ? hashIndex : 0);
+
+      // Se os slides forem servidos pelo lab (http), o experimento fica na mesma origem
+      const openLab = document.getElementById("open-lab");
+      if (openLab && location.protocol.startsWith("http")) openLab.href = location.origin + "/";
+    })();
+  </script>
+
+<script id="interactive-redesign-js">
+(function(){
+  // Add a subtle active state to flow nodes on hover/focus.
+  document.querySelectorAll('.flow .node').forEach(function(node){
+    node.addEventListener('mouseenter',function(){
+      this.parentElement.querySelectorAll('.node').forEach(function(n){n.classList.remove('flow-focus')});
+      this.classList.add('flow-focus');
+    });
+    node.addEventListener('focusin',function(){
+      this.parentElement.querySelectorAll('.node').forEach(function(n){n.classList.remove('flow-focus')});
+      this.classList.add('flow-focus');
+    });
+  });
+
+  // Preserve the existing deck navigation while improving visual orientation.
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  function refreshVisualState(){
+    const active = document.querySelector('.slide.active');
+    if(!active) return;
+    slides.forEach(function(slide){
+      slide.querySelectorAll('.flow .node').forEach(function(n){
+        n.setAttribute('tabindex','0');
+      });
+    });
+  }
+  refreshVisualState();
+
+  // Keyboard-friendly focus: Esc clears a temporary flow highlight.
+  document.addEventListener('keydown',function(e){
+    if(e.key === 'Escape'){
+      document.querySelectorAll('.flow-focus').forEach(function(n){n.classList.remove('flow-focus')});
+    }
+  });
+})();
+</script>
+
+</body>
+</html>

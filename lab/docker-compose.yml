@@ -1,0 +1,52 @@
+name: techday-cadmus
+
+x-hardening: &hardening
+  read_only: true
+  cap_drop: [ALL]
+  security_opt: ["no-new-privileges:true"]
+  tmpfs: ["/tmp"]
+  restart: unless-stopped
+
+services:
+  frontend:
+    build: ./frontend
+    <<: *hardening
+    depends_on: [scanner, backend]
+    volumes:
+      - ../ciberseguranca-preventiva-com-ia.html:/usr/share/nginx/html/apresentacao.html:ro
+    ports:
+      - "127.0.0.1:${FRONTEND_PORT:-8088}:8080"
+    networks: [lab, edge]
+    mem_limit: 128m
+
+  backend:
+    build: ./backend
+    <<: *hardening
+    environment:
+      JWT_SECRET: ${JWT_SECRET:-lab-only-fake-secret-change-me}
+    networks: [lab]          # rede interna: sem acesso à internet nem ao host
+    mem_limit: 256m
+    pids_limit: 100
+
+  scanner:
+    build: ./scanner
+    <<: *hardening
+    environment:
+      SCANNER_MODE: ${SCANNER_MODE:-demo}
+      LLM_BASE_URL: ${LLM_BASE_URL:-https://generativelanguage.googleapis.com/v1beta/openai}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_MODEL: ${LLM_MODEL:-gemini-3.5-flash-lite}
+      LLM_JSON_MODE: ${LLM_JSON_MODE:-true}
+      LLM_DEBUG: ${LLM_DEBUG:-false}
+      DEMO_DELAY_MS: ${DEMO_DELAY_MS:-1800}
+      TARGET_DIR: /target
+    volumes:
+      - ./backend/src:/target:ro    # o scanner só LÊ o código-fonte
+    networks: [lab, egress]         # único serviço com saída (somente para o endpoint da LLM)
+    mem_limit: 256m
+
+networks:
+  lab:
+    internal: true
+  edge: {}
+  egress: {}

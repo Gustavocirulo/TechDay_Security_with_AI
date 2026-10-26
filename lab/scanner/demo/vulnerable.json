@@ -1,0 +1,59 @@
+{
+  "vulnerabilities": [
+    {
+      "type": "SQL Injection",
+      "severity": "CRITICAL",
+      "file": "backend/src/vulnerable/users.js",
+      "line": 0,
+      "title": "Consulta SQL construída por concatenação com entrada do usuário",
+      "description": "O parâmetro 'name' vem direto da query string e é concatenado na consulta SQL. Um atacante pode usar UNION SELECT para ler colunas sensíveis (ex.: password_hash) ou alterar a lógica da consulta.",
+      "code": "const query = \"SELECT id, name, email FROM users WHERE name LIKE '%\" + name + \"%'\";",
+      "recommendation": "Usar queries parametrizadas (prepared statements) e limitar o tamanho da entrada.",
+      "fixed_code": "const stmt = db.prepare('SELECT id, name, email FROM users WHERE name LIKE ?');\nres.json(stmt.all(`%${name}%`));"
+    },
+    {
+      "type": "Command Injection",
+      "severity": "CRITICAL",
+      "file": "backend/src/vulnerable/ping.js",
+      "line": 0,
+      "title": "Entrada do usuário executada em um shell",
+      "description": "O parâmetro 'host' é interpolado em um comando passado a exec(), que usa o shell. Valores como '127.0.0.1; id' executam comandos arbitrários no servidor.",
+      "code": "exec(`ping -c 1 ${host}`, { timeout: 5000 }, (err, stdout, stderr) => {",
+      "recommendation": "Validar o host com allowlist (regex) e usar execFile com argumentos separados, sem shell.",
+      "fixed_code": "if (!HOST_RE.test(host)) return res.status(400).json({ error: 'Host inválido' });\nexecFile('ping', ['-c', '1', host], { timeout: 5000 }, (err, stdout, stderr) => {"
+    },
+    {
+      "type": "Hardcoded Secret",
+      "severity": "HIGH",
+      "file": "backend/src/vulnerable/auth.js",
+      "line": 0,
+      "title": "Segredo de assinatura escrito no código-fonte",
+      "description": "A chave usada para assinar tokens está fixa no código. Quem tiver acesso ao repositório pode forjar tokens válidos, e a rotação exige novo deploy.",
+      "code": "const JWT_SECRET = 'cadmus-super-secret-2024';",
+      "recommendation": "Ler o segredo de variável de ambiente ou de um gerenciador de segredos e falhar se ausente.",
+      "fixed_code": "const JWT_SECRET = process.env.JWT_SECRET;\nif (!JWT_SECRET) throw new Error('JWT_SECRET não definido');"
+    },
+    {
+      "type": "Cross-Site Scripting (XSS)",
+      "severity": "HIGH",
+      "file": "backend/src/vulnerable/comments.js",
+      "line": 0,
+      "title": "Comentários inseridos no HTML sem escape",
+      "description": "Autor e texto do comentário são injetados no HTML sem codificação. Um comentário com <script> executa JavaScript no navegador de quem visualizar a página.",
+      "code": ".map((c) => `<li><b>${c.author}</b>: ${c.text}</li>`)",
+      "recommendation": "Escapar a saída HTML (ou usar template engine com auto-escape) e adicionar Content-Security-Policy.",
+      "fixed_code": ".map((c) => `<li><b>${escapeHtml(c.author)}</b>: ${escapeHtml(c.text)}</li>`)\n// + res.set('Content-Security-Policy', \"default-src 'none'\")"
+    },
+    {
+      "type": "Falta de validação de entrada",
+      "severity": "MEDIUM",
+      "file": "backend/src/vulnerable/transfer.js",
+      "line": 0,
+      "title": "Transferência sem validar contas nem valor",
+      "description": "Contas e valor não são validados. Um valor negativo inverte a transferência (rouba saldo) e contas inexistentes geram NaN no saldo.",
+      "code": "balances[from] -= amount;",
+      "recommendation": "Validar tipos, existência das contas, valor positivo e saldo suficiente antes de alterar o estado.",
+      "fixed_code": "if (typeof amount !== 'number' || !Number.isFinite(amount) || amount <= 0) {\n  return res.status(400).json({ error: 'Valor inválido' });\n}\nif (amount > balances[from]) return res.status(400).json({ error: 'Saldo insuficiente' });"
+    }
+  ]
+}

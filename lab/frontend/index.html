@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TechDay Cadmus — AI Security Lab</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="hero">
+    <div>
+      <a class="back-btn" href="/apresentacao.html#slide-6">← Voltar à apresentação</a>
+      <h1>TechDay Cadmus</h1>
+      <p class="subtitle">AI Security Lab</p>
+      <p class="welcome">Bem-vindo ao teste TechDay Cadmus</p>
+    </div>
+    <div class="cycle" aria-label="Ciclo da demonstração">
+      <span>CÓDIGO</span><i>→</i><span>ANÁLISE DA IA</span><i>→</i><span>VULNERABILIDADE</span><i>→</i><span>CORREÇÃO</span><i>→</i><span>NOVA ANÁLISE</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="panel" id="controls">
+      <div class="control-group">
+        <label>Modo</label>
+        <div class="toggle" id="mode-toggle">
+          <button data-value="demo">DEMO MODE</button>
+          <button data-value="real">REAL MODE (LLM)</button>
+        </div>
+        <small id="mode-hint"></small>
+      </div>
+      <div class="control-group">
+        <label>Código analisado</label>
+        <div class="toggle" id="version-toggle">
+          <button data-value="vulnerable">Vulnerável</button>
+          <button data-value="fixed">Corrigido</button>
+        </div>
+        <small>Compare <code>backend/src/vulnerable</code> × <code>backend/src/fixed</code></small>
+      </div>
+      <button id="scan-btn" class="primary">Executar análise de segurança</button>
+    </section>
+
+    <section class="panel" id="status" hidden>
+      <div class="spinner"></div><span>IA analisando código...</span>
+    </section>
+    <section class="panel error" id="error" hidden></section>
+
+    <section id="results" hidden>
+      <div class="panel result-head">
+        <div class="badges">
+          <span class="badge ai">🤖 AI Security Analysis</span>
+          <span class="badge" id="analyzed-by"></span>
+          <span class="badge muted" id="meta"></span>
+        </div>
+        <div class="summary" id="summary"></div>
+      </div>
+      <div id="empty" class="panel ok" hidden>✅ Nenhuma vulnerabilidade encontrada nesta versão do código.</div>
+      <div class="grid">
+        <div id="cards" class="cards"></div>
+        <aside id="viewer" class="panel viewer" hidden>
+          <div class="viewer-head">
+            <div>
+              <strong id="v-title"></strong>
+              <div class="muted" id="v-loc"></div>
+            </div>
+            <div class="toggle" id="view-toggle">
+              <button data-value="vulnerable">Vulnerável</button>
+              <button data-value="fixed">Corrigido</button>
+            </div>
+          </div>
+          <div id="v-file" class="code"></div>
+          <div class="flow">
+            <h4 class="bad">Código vulnerável</h4>
+            <pre id="v-code"></pre>
+            <div class="arrow">↓ trecho destacado acima ↓</div>
+            <h4 class="good">Código corrigido</h4>
+            <pre id="v-fixed"></pre>
+            <p id="v-reco" class="reco"></p>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="panel" id="app-demo">
+      <h3>Aplicação em execução (alvo da análise)</h3>
+      <p class="muted">Busca de usuários — rota <code>/users/search</code> do backend. Dados fictícios.</p>
+      <form id="search-form">
+        <input id="search-input" placeholder="ex.: alice" autocomplete="off">
+        <button>Buscar</button>
+      </form>
+      <pre id="search-out" class="out">—</pre>
+    </section>
+  </main>
+
+  <footer>Laboratório local e isolado em Docker · dados e credenciais fictícios · não use em produção</footer>
+  <script src="app.js"></script>
+</body>
+</html>
